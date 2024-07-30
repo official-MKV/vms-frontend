@@ -2,11 +2,13 @@ import React from "react";
 
 const Table = ({ children, head }) => {
   return (
-    <table class="table-auto ">
-      <thead className="">
+    <table class="table-auto w-full relative">
+      <thead className=" ">
         <tr>
           {head.map((item) => {
-            return <th className="font-light px-[30px] ">{item}</th>;
+            return (
+              <th className="relative font-light px-[30px]  w-1/8">{item}</th>
+            );
           })}
         </tr>
       </thead>
@@ -14,5 +16,6 @@ const Table = ({ children, head }) => {
     </table>
   );
 };
+<div></div>;
 
 export default Table;

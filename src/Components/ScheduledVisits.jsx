@@ -88,7 +88,7 @@ function ScheduledVisits() {
   };
 
   return (
-    <div className="relative max-h-[100vh] overflow-y-scroll bg-[#F6F8FB] flex items-center flex-col p-4 rounded shadow">
+    <div className="relative h-[90vh]  overflow-y-scroll bg-[#F6F8FB] flex items-center flex-col p-4 rounded shadow scrollbar-thumb-h-3">
       <div className="relative bg-white flex w-[80%] mb-4">
         <button
           className={`py-2 px-4 flex-1 ${

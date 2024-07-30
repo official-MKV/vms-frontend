@@ -1,3 +1,30 @@
+/* styles.css */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Scrollbar styles for WebKit browsers */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #E1ECFF;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4285F4;
+  border-radius: 5px;
+  height: 200px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Scrollbar styles for Firefox */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #4285F4 #E1ECFF;
+}

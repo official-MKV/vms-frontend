@@ -8,10 +8,41 @@ import { IoMdPersonAdd } from "react-icons/io";
 import Calendar from "./Calendar";
 import Register from "./Register";
 import { useState } from "react";
+import { FaRegCalendarAlt } from "react-icons/fa";
+import { format } from "date-fns";
 
 function StaffApp() {
   const [register, setRegister] = useState(false);
+  const getFormattedDate = (date) => {
+    if (!date || isNaN(date.getTime())) {
+      // console.error("Invalid date provided:", date);
+      return format(new Date(), "EEEE, dd MMMM");
+    }
+
+    return format(date, "EEEE, dd MMMM");
+  };
   const [currentdate, setCurrentDate] = useState(null);
+
+  const requests = [
+    {
+      name: "Makplang Vem",
+      date: "Monday, May 6",
+      time: "10:00 AM",
+      org: "Covenant University",
+      type: "Official",
+      gender: "Male",
+      email: "makplangvem666@gmail.com",
+    },
+    {
+      name: "Ifeoma Abajogu",
+      date: "Friday, May 10",
+      time: "1:00 PM",
+      org: "Baze University",
+      type: "Official",
+      gender: "Female",
+      email: "ifeomaabajogu@gmail.com",
+    },
+  ];
   const events = {
     "2024-06-10": [{ title: "Event 1" }],
     "2024-06-15": [{ title: "Event 2" }],
@@ -57,19 +88,45 @@ function StaffApp() {
           <IoMdPersonAdd />
         </div>
       </div>
-      <div className="w-full flex px-[20px] gap-[20px]">
-        <div className="w-full ">
+      <div className="w-full flex h-screen px-[20px] gap-[20px]">
+        <div className="w-full h-full">
           <ScheduledVisits />
         </div>
         <div className="relative w-full flex flex-col gap-4 pb-[100px] ">
           <VisitorRequests />
           <div className="flex bg-[#F6F8FB] gap-3 p-[20px]">
-            <Calendar events={events} />
+            <Calendar events={events} onDateClick={setCurrentDate} />
             <div className="w-1/2 h-full bg-[white] ">
               <div className="w-full bg-[#4285F41A] px-[10px]  h-[50px]  flex  items-center font-bold bg-opacity-10">
-                Friday, 12 Jan
+                {getFormattedDate(currentdate)}
               </div>
-              <div className=""></div>
+              <div className="flex flex-col">
+                {requests.map((item) => {
+                  return (
+                    <div className="w-full h-[80px] relative border-b-[1px] border-[gray]/20 ">
+                      <div
+                        className={`w-[5px] h-full bg-[#4285F4] absolute left-0  `}
+                      />
+                      <div className="px-[20px] py-[10px]">
+                        <div className="flex gap-3 items-center justify-between">
+                          <div className="flex gap-3 items-center">
+                            <FaRegCalendarAlt />
+                            <p className="text-[15px] font-bold">{item.name}</p>
+                          </div>
+
+                          <span className="font-bold text-[15px]">
+                            {item.time}
+                          </span>
+                        </div>
+
+                        <span className=" pl-[26px] text-[12px] text-[gray]/40 font-medium">
+                          {item.org}.{item.reason}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

@@ -37,6 +37,7 @@ const Calendar = ({ events, onDateClick }) => {
   };
 
   const handleClick = (day) => {
+    console.log(day);
     if (onDateClick) {
       onDateClick(day);
     }
@@ -45,15 +46,15 @@ const Calendar = ({ events, onDateClick }) => {
   while (day <= endDate) {
     for (let i = 0; i < 7; i++) {
       formattedDate = format(day, dateFormat);
-
+      const cloneDay = new Date(day);
       days.push(
         <div
-          className={`p-2 text-[10px] font-bold rounded-[5px] flex flex-col items-center justify-center  cursor-pointer
+          className={`p-2 text-[10px] font-bold rounded-[5px] flex flex-col items-center justify-center cursor-pointer
           ${!isSameMonth(day, monthStart) ? "text-gray-400" : ""}
           ${isSameDay(day, new Date()) ? "bg-[#4285F41A]" : ""}
           ${events && events[format(day, "yyyy-MM-dd")] ? "bg-[#47B399]" : ""}`}
           key={day}
-          onClick={() => handleClick(day)}
+          onClick={() => handleClick(cloneDay)}
         >
           <span>{formattedDate}</span>
         </div>
@@ -63,7 +64,7 @@ const Calendar = ({ events, onDateClick }) => {
   }
 
   return (
-    <div className="w-1/2  bg-[white] p-[10px] rounded-[10px]">
+    <div className="w-1/2 bg-white p-10 rounded-10">
       <div className="flex justify-between items-center my-4">
         <button onClick={prevMonth} className="text-xl">
           &lt;
@@ -76,8 +77,11 @@ const Calendar = ({ events, onDateClick }) => {
         </button>
       </div>
       <div className="grid grid-cols-7 gap-1">
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-          <div className="text-center font-bold" key={day}>
+        {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
+          <div
+            className="text-center font-bold text-[gray]/50 text-[12px]"
+            key={day}
+          >
             {day}
           </div>
         ))}
