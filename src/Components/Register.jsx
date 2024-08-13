@@ -1,7 +1,22 @@
 import React, { useState } from "react";
 import Popup from "./Popup";
+import config from "../config";
+import { useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Register = ({ close }) => {
+  const queryClient = useQueryClient();
+  const [submit_url, setUrl] = useState(null);
+  useEffect(() => {
+    const staff = queryClient.getQueryData(["user"]);
+
+    if (staff?.is_staff) {
+      setUrl(`${config.REACT_APP_API_URL}/api/registerVisitor`);
+    } else {
+      setUrl(`${config.REACT_APP_API_URL}/api/registerVisitor`);
+    }
+  }, [queryClient]);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -24,191 +39,186 @@ const Register = ({ close }) => {
       [name]: value,
     }));
   };
+  const registerVisitor = useMutation({
+    mutationFn: async () => {
+      console.log(formData);
+      const response = await fetch(submit_url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-  const handleRegister = async () => {
-    console.log(formData);
-    try {
-      const response = await fetch(
-        "http://192.168.167.83:8000/api/registerVisitor",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-      if (response.ok) {
-        alert("Registration successful");
-      } else {
-        alert("Registration failed");
+      if (!response.ok) {
+        throw new Error("Registration failed");
       }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("An error occurred. Please try again.");
-    }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["visitorRequests", "Pending"],
+      });
+
+      queryClient.invalidateQueries(["visitorList"]);
+
+      close(); // Close the popup after successful registration
+    },
+    onError: (error) => {
+      alert(error.message || "An error occurred during registration");
+    },
+  });
+
+  const handleRegister = () => {
+    registerVisitor.mutate();
   };
 
   return (
     <Popup close={close}>
-      <div className="bg-white w-[40vw] h-[70vh] rounded-xl px-[20px] py-[50px]">
-        <div className="flex flex-wrap gap-5">
+      <div
+        className="bg-white w-full max-w-4xl rounded-xl p-6 md:p-8 overflow-y-auto max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
+          Schedule a Visit
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <span className="font-bold text-[17px]">Visitor Details</span>
-            <div>
-              <div className="flex gap-2 w-full">
-                <span>
-                  <label>Surname</label>
-                  <input
-                    name="lastName"
-                    placeholder="Surname"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    className="focus:outline-none border-[1px] border-black rounded-md w-full px-[5px]"
-                  />
-                </span>
-                <span>
-                  <label>First Name</label>
-                  <input
-                    name="firstName"
-                    placeholder="First Name"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    className="focus:outline-none border-[1px] border-black rounded-md w-full px-[5px]"
-                  />
-                </span>
-              </div>
-              <div className="flex gap-2 w-full">
-                <span>
-                  <label>Phone Number</label>
-                  <input
-                    name="phoneNumber"
-                    placeholder="Phone Number"
-                    value={formData.phoneNumber}
-                    onChange={handleChange}
-                    className="focus:outline-none border-[1px] border-black rounded-md w-full px-[5px]"
-                  />
-                </span>
-                <span>
-                  <label>Email Address</label>
-                  <input
-                    name="email"
-                    placeholder="Email Address"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="focus:outline-none border-[1px] border-black rounded-md w-full px-[5px]"
-                  />
-                </span>
-              </div>
-              <div className="flex gap-2 w-full">
-                <span>
-                  <label>Organization</label>
-                  <input
-                    name="organization"
-                    placeholder="Organization"
-                    value={formData.organization}
-                    onChange={handleChange}
-                    className="focus:outline-none border-[1px] border-black rounded-md w-full px-[5px]"
-                  />
-                </span>
-              </div>
-              <div className="flex gap-2 w-full">
-                <span>
-                  <label>Visit Date</label>
-                  <input
-                    name="visitDate"
-                    placeholder="Visit Date"
-                    type="date"
-                    value={formData.visitDate}
-                    onChange={handleChange}
-                    className="focus:outline-none border-[1px] border-black rounded-md w-full px-[5px]"
-                  />
-                </span>
-              </div>
-              <div className="flex gap-2 w-full">
-                <span>
-                  <label>Visit Time</label>
-                  <input
-                    name="visitTime"
-                    placeholder="Visit Time"
-                    type="time"
-                    value={formData.visitTime}
-                    onChange={handleChange}
-                    className="focus:outline-none border-[1px] border-black rounded-md w-full px-[5px]"
-                  />
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col gap-3">
-            <span className="font-bold text-[17px]">Staff Details</span>
-            <div>
-              <div className="flex gap-2 w-full">
-                <span>
-                  <label>Whom to See</label>
-                  <input
-                    name="whomToSeeInput"
-                    placeholder="Full Name"
-                    value={formData.whomToSeeInput}
-                    onChange={handleChange}
-                    className="focus:outline-none border-[1px] border-black rounded-md w-full px-[5px]"
-                  />
-                </span>
-                <span>
-                  <label>Department</label>
-                  <input
-                    name="department"
-                    placeholder="Department"
-                    value={formData.department}
-                    onChange={handleChange}
-                    className="focus:outline-none border-[1px] border-black rounded-md w-full px-[5px]"
-                  />
-                </span>
-              </div>
-            </div>
-            <div className="w-full flex items-center gap-2">
-              <label>Cause of Visit:</label>
-              <div className="flex gap-3">
-                <Option
-                  value="Excursion"
-                  handleChange={handleChange}
-                  formData={formData}
+            <h3 className="font-bold text-lg mb-4 text-gray-700">
+              Visitor Details
+            </h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <InputField
+                  label="Surname"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
                 />
-                <Option
-                  value="Personal"
-                  handleChange={handleChange}
-                  formData={formData}
+                <InputField
+                  label="First Name"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
                 />
-                <Option
-                  value="Marketing"
-                  handleChange={handleChange}
-                  formData={formData}
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <InputField
+                  label="Phone Number"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
                 />
-                <Option
-                  value="Official"
-                  handleChange={handleChange}
-                  formData={formData}
+                <InputField
+                  label="Email Address"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </div>
+              <InputField
+                label="Organization"
+                name="organization"
+                value={formData.organization}
+                onChange={handleChange}
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <InputField
+                  label="Visit Date"
+                  name="visitDate"
+                  type="date"
+                  value={formData.visitDate}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label="Visit Time"
+                  name="visitTime"
+                  type="time"
+                  value={formData.visitTime}
+                  onChange={handleChange}
                 />
               </div>
             </div>
           </div>
-          <div
-            className="flex items-center justify-center text-white bg-[#4285F4] w-[70%] py-[5px] rounded-full cursor-pointer"
+          <div>
+            <h3 className="font-bold text-lg mb-4 text-gray-700">
+              Staff Details
+            </h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <InputField
+                  label="Whom to See"
+                  name="whomToSeeInput"
+                  value={formData.whomToSeeInput}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label="Department"
+                  name="department"
+                  value={formData.department}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Cause of Visit
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {["Excursion", "Personal", "Marketing", "Official"].map(
+                    (reason) => (
+                      <Option
+                        key={reason}
+                        value={reason}
+                        handleChange={handleChange}
+                        formData={formData}
+                      />
+                    )
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="mt-8 flex justify-center">
+          <button
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             onClick={handleRegister}
           >
-            Schedule a visit
-          </div>
+            Schedule Visit
+          </button>
         </div>
       </div>
     </Popup>
   );
 };
 
+const InputField = ({ label, name, type = "text", value, onChange }) => (
+  <div>
+    <label
+      htmlFor={name}
+      className="block text-sm font-medium text-gray-700 mb-1"
+    >
+      {label}
+    </label>
+    <input
+      type={type}
+      id={name}
+      name={name}
+      value={value}
+      onChange={onChange}
+      className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+    />
+  </div>
+);
+
 const Option = ({ value, handleChange, formData }) => {
   return (
     <div
-      className={`rounded-full px-[5px] py-[4px] border-[1px] border-black cursor-pointer ${
-        formData.reason === value ? "bg-[#4285F4] text-white" : ""
+      className={`rounded-full px-3 py-1 text-sm border border-gray-300 cursor-pointer transition-colors duration-200 ${
+        formData.reason === value
+          ? "bg-blue-600 text-white border-blue-600"
+          : "hover:bg-gray-100"
       }`}
       onClick={() => handleChange({ target: { name: "reason", value } })}
     >

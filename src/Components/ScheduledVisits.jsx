@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { IoMdMore } from "react-icons/io";
 import { FaRegClock } from "react-icons/fa";
+import { useEffect } from "react";
 
 const initialAppointments = [
   {
@@ -39,17 +40,20 @@ const initialHistory = [
   // Add some history data here if needed
 ];
 
-function ScheduledVisits() {
+function ScheduledVisits({ scheduledVisits, open, historyVisits }) {
   const [appointments, setAppointments] = useState(initialAppointments);
   const [history, setHistory] = useState(initialHistory);
   const [activeTab, setActiveTab] = useState("appointments");
-
+  const [visits, setVisits] = useState();
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
+  useEffect(() => {
+    setVisits(scheduledVisits);
+  }, [scheduledVisits]);
 
   const renderVisits = (visits) => {
-    return visits.map((visit, index) => (
+    return visits?.map((visit, index) => (
       <div
         key={index}
         className=" w-[600px] h-[170px] relative bg-white  rounded-[10px] flex overflow-hidden border-b"
@@ -70,15 +74,17 @@ function ScheduledVisits() {
                 <FaRegClock />
               </div>
               <div className="text-[14px]">
-                {visit.date} • {visit.time}
+                {visit.visitor.visitDate} • {visit.visitor.visitTime}
               </div>
             </div>
           </div>
           <div className="h-[2px] bg-[#EEEEEE] w-[70%] " />
           <div className="mt-[10px]">
-            <div className="font-bold">{visit.name}</div>
+            <div className="font-bold">
+              {visit.visitor.lastName},{visit.visitor.firstName}
+            </div>
             <div className="text-gray-500">
-              {visit.organization} • {visit.reason}
+              {visit.visitor.organization} • {visit.visitor.reason}
             </div>
             <div></div>
           </div>
@@ -88,7 +94,7 @@ function ScheduledVisits() {
   };
 
   return (
-    <div className="relative h-[90vh]  overflow-y-scroll bg-[#F6F8FB] flex items-center flex-col p-4 rounded shadow scrollbar-thumb-h-3">
+    <div className="relative h-full mb-[100px]  overflow-y-scroll bg-[#F6F8FB] flex items-center flex-col p-4 rounded shadow scrollbar-thumb-h-3">
       <div className="relative bg-white flex w-[80%] mb-4">
         <button
           className={`py-2 px-4 flex-1 ${
@@ -113,12 +119,17 @@ function ScheduledVisits() {
       </div>
       <div className="w-full flex flex-col gap-[10px]">
         {activeTab === "appointments"
-          ? renderVisits(appointments)
-          : renderVisits(history)}
+          ? renderVisits(visits)
+          : renderVisits(historyVisits)}
       </div>
-      <Link to="/schedule-visit" className="text-blue-500 mt-4 block">
+      <div
+        onClick={() => {
+          open();
+        }}
+        className="text-blue-500 mt-4 block cursor-pointer"
+      >
         Schedule a visit
-      </Link>
+      </div>
     </div>
   );
 }

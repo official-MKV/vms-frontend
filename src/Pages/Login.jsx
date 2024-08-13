@@ -1,42 +1,48 @@
 import React from "react";
 import { useState } from "react";
 import Logo from "../assets/nigcomsatlogo.png";
-import { useNavigate } from "react-router-dom";
+import { Router, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { identity } from "@fullcalendar/core/internal";
 const AttendantLogin = () => {
   const [staffId, setStaffId] = useState(null);
   const [pass, setPass] = useState(null);
-  const navigate = useNavigate();
-  const Submit = async () => {
-    const loginAttendant = async (staffId, pass) => {
-      const res = await fetch("http://127.0.0.1:8000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json", // Add this line
-        },
-        body: JSON.stringify({
-          user_id: staffId,
-          password: pass,
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return data;
-      } else {
-        throw new Error("Login failed");
-      }
-    };
 
-    try {
-      const data = await loginAttendant(staffId, pass);
-      console.log(data);
-      localStorage.setItem("verified", true);
-      navigate("/table");
-    } catch (error) {
-      toast.error(`Error Signing in:${error} `);
-      console.error("Problem Signing In:", error);
+  const navigate = useNavigate();
+
+  const loginStaff = async ({ staffId, pass }) => {
+    const res = await fetch("http://127.0.0.1:8000/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json", // Add this line
+      },
+      body: JSON.stringify({
+        user_id: staffId,
+        password: pass,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data;
+    } else {
+      throw new Error("Login failed");
     }
   };
+  const queryClient = useQueryClient();
+  const { mutate: submit, isLoading } = useMutation({
+    mutationKey: ["staff"],
+    mutationFn: loginStaff,
+    onSuccess: (data) => {
+      queryClient.setQueryData(["user"], data);
+      console.log(data);
+      if (data.is_staff) {
+        navigate("/staff");
+      } else {
+        navigate("/attendant");
+      }
+    },
+  });
 
   return (
     <div className=" w-full flex items-center justify-center flex-col gap-[50px]">
@@ -66,12 +72,15 @@ const AttendantLogin = () => {
           type="password"
           required
         />
-        <button
+        <div
           className=" px-[30px] py-[3px] rounded-md bg-blue-500 text-[white] "
-          onClick={Submit}
+          disabled={isLoading}
+          onClick={() => {
+            submit({ staffId, pass });
+          }}
         >
-          Login
-        </button>
+          {!isLoading ? "Login" : "logining in"}
+        </div>
       </div>
     </div>
   );

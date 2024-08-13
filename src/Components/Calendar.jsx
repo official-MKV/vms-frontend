@@ -16,7 +16,7 @@ import {
 
 const Calendar = ({ events, onDateClick }) => {
   const [currentDate, setCurrentDate] = React.useState(new Date());
-
+  console.log(events);
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const startDate = startOfWeek(monthStart);
